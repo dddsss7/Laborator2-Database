@@ -1,0 +1,60 @@
+CREATE TABLE client (
+  id_client     SERIAL PRIMARY KEY,
+  nume          VARCHAR(50) NOT NULL,
+  prenume       VARCHAR(50) NOT NULL,
+  telefon       VARCHAR(20),
+  email         VARCHAR(100) NOT NULL UNIQUE,
+  data_nasterii DATE CHECK (data_nasterii < CURRENT_DATE)
+);
+
+CREATE TABLE camera (
+  id_camera   SERIAL PRIMARY KEY,
+  numar       INT NOT NULL UNIQUE,
+  etaj        INT NOT NULL CHECK (etaj >= 0),
+  pret_noapte DECIMAL(10,2) NOT NULL CHECK (pret_noapte > 0),
+  disponibila BOOLEAN NOT NULL DEFAULT TRUE,
+  tip_camera  VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE serviciu (
+  id_serviciu SERIAL PRIMARY KEY,
+  denumire    VARCHAR(100) NOT NULL UNIQUE,
+  pret        DECIMAL(10,2) NOT NULL CHECK (pret >= 0),
+  descriere   TEXT,
+  disponibil  BOOLEAN NOT NULL DEFAULT TRUE,
+  durata      INT CHECK (durata > 0)
+);
+
+CREATE TABLE rezervare (
+  id_rezervare  SERIAL PRIMARY KEY,
+  id_client     INT NOT NULL REFERENCES client(id_client)
+                ON DELETE RESTRICT ON UPDATE CASCADE,
+  id_camera     INT NOT NULL REFERENCES camera(id_camera)
+                ON DELETE RESTRICT ON UPDATE CASCADE,
+  data_checkin  DATE NOT NULL,
+  data_checkout DATE NOT NULL,
+  confirmata    BOOLEAN NOT NULL DEFAULT FALSE,
+  CHECK (data_checkout > data_checkin)
+);
+
+CREATE TABLE plata (
+  id_plata     SERIAL PRIMARY KEY,
+  id_rezervare INT NOT NULL UNIQUE REFERENCES rezervare(id_rezervare)
+               ON DELETE CASCADE ON UPDATE CASCADE,
+  suma         DECIMAL(10,2) NOT NULL CHECK (suma > 0),
+  metoda       VARCHAR(30) NOT NULL
+               CHECK (metoda IN ('cash', 'card', 'transfer')),
+  data_platii  DATE NOT NULL DEFAULT CURRENT_DATE,
+  achitata     BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+CREATE TABLE rezervare_serviciu (
+  id_rezervares SERIAL PRIMARY KEY,
+  id_rezervare  INT NOT NULL REFERENCES rezervare(id_rezervare)
+                ON DELETE CASCADE ON UPDATE CASCADE,
+  id_serviciu   INT NOT NULL REFERENCES serviciu(id_serviciu)
+                ON DELETE RESTRICT ON UPDATE CASCADE,
+  cantitate     INT NOT NULL DEFAULT 1 CHECK (cantitate > 0),
+  pret_total    DECIMAL(10,2) NOT NULL CHECK (pret_total >= 0),
+  data_s        DATE NOT NULL DEFAULT CURRENT_DATE
+);
