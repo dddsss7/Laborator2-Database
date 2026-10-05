@@ -1,0 +1,10 @@
+CREATE TABLE tabel_test (
+  id        SERIAL PRIMARY KEY,
+  nume      VARCHAR(50),
+  descriere VARCHAR(50)
+);
+
+ALTER TABLE tabel_test ADD COLUMN data_creare DATE;
+ALTER TABLE tabel_test ALTER COLUMN nume TYPE VARCHAR(100);
+ALTER TABLE tabel_test DROP COLUMN descriere;
+DROP TABLE tabel_test;
